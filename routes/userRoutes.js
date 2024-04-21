@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 
 // Schema
 import User from "../schema/Userschema.js";
+import RoleSchema from "../schema/RoleSchema.js";
+import Userschema from "../schema/Userschema.js";
 
 // Const
 const router = express.Router();
@@ -26,14 +28,25 @@ router.post("/register", async (req, res) => {
     userFound && res.status(400).json("User Already Register");
     const salt = bcrypt.genSaltSync(11);
     const hash = bcrypt.hashSync(reqPassword, salt);
+    const role_id = "6624a400f0b662e620607949";
     const newUser = new User({
       username,
       email,
       password: hash,
+      role_id,
     });
     const userData = await newUser.save();
     const { password, ...others } = userData._doc;
-    res.status(200).json(others);
+    const role = await RoleSchema.findByIdAndUpdate(
+      role_id,
+      {
+        $push: {
+          users_list: others._id,
+        },
+      },
+      { new: true }
+    ).exec();
+    res.status(200).json({ ...others, role });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -61,9 +74,42 @@ router.post("/login", async (req, res) => {
       return res.status(400).json("Email Not Found");
     }
   } catch (err) {
-    console.log(err, "err")
+    console.log(err, "err");
     return res.status(500).json(err);
   }
+});
+
+router.get("/", async (req, res) => {
+  const users = await Userschema.aggregate([
+    {
+      $lookup: {
+        as: "role_id",
+        from: "roles",
+        pipeline: [
+          {
+            $project: {
+              access_management: {
+                show: 0,
+                "view.show": 0,
+                "edit.show": 0,
+                "add.show": 0,
+                "export.show": 0,
+                "export.path": 0,
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project : {
+        password : 0,
+      }
+    }
+  ]);
+
+  if (users) return res.status(200).json(users);
+  return res.status(400).json("Something Wrong");
 });
 
 export default router;

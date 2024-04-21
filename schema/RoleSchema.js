@@ -1,24 +1,15 @@
 import mongoose, { Schema } from "mongoose";
+import { ChildSchema } from "./ChildModuleSchema.js";
+import { ParentSchema } from "./ParentModuleSchema.js";
+
+const AccesManagementSchema = {
+    ...ParentSchema,
+    child : [ChildSchema]
+}
 
 const RoleSchema = new Schema({
-    list : {
-        access : Boolean
-    },
-    add : {
-        access : Boolean
-    },
-    edit : {
-        access : Boolean
-    },
-    view : {
-        access : Boolean
-    },
-    delete : {
-        access : Boolean,
-    },
-    all : {
-        access :Boolean
-    },
+    name : String,
+    access_management : [AccesManagementSchema],
     users_list : [{type : Schema.Types.ObjectId, ref : "User"}]
 })
 

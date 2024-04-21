@@ -8,12 +8,17 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/userRoutes.js"
 import campusRouter from "./routes/campusRoute.js"
 import buildingRouter from "./routes/buildingRoute.js";
+import ParentModuleRouter from "./routes/parentModule.js";
+import ChildModuleRouter from "./routes/childModule.js";
+import RoleRouter from "./routes/roleRoute.js";
+import EssentialRouter from "./routes/essentialRoute.js";
 
 
 
 //Variables
 const app = express();
 const {PORT, MONGO_URL} = process.env;
+const path = '/api'
 
 
 
@@ -27,9 +32,17 @@ app.use(cors())
 
 
 //Routes
-app.use("/api/users", userRouter)
-app.use("/api/campus", campusRouter)
-app.use("/api/building", buildingRouter)
+app.use(`${path}/users`, userRouter)
+app.use(`${path}/campus`, campusRouter)
+app.use(`${path}/building`, buildingRouter)
+app.use(`${path}/parent-module`, ParentModuleRouter)
+app.use(`${path}/child-module`, ChildModuleRouter)
+app.use(`${path}/role`, RoleRouter)
+app.use(`${path}/essential`, EssentialRouter)
+
+
+
+
 
 
 
